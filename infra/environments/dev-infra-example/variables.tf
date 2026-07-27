@@ -119,3 +119,8 @@ variable "apis_to_enable" {
     "run.googleapis.com"               # Required for Cloud Run
   ]
 }
+
+variable "vpc_network_id" {
+  description = "The self_link of the VPC network for Cloud SQL private IP."
+  type        = string
+}

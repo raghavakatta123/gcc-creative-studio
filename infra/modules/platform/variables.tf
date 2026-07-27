@@ -80,3 +80,8 @@ variable "backend_runtime_secrets" {
   description = "Secrets to mount in the backend container at runtime."
   default     = {}
 }
+
+variable "vpc_network_id" {
+  description = "The self_link of the VPC network for Cloud SQL private IP."
+  type        = string
+}

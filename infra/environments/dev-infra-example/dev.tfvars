@@ -71,3 +71,6 @@ apis_to_enable = [
   "texttospeech.googleapis.com",
   "workflows.googleapis.com",
 ]
+
+# --- VPC Network ---
+vpc_network_id = "projects/vpc-shared-project-482119/global/networks/creative-studio-vpc"

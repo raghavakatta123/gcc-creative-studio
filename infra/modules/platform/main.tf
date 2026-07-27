@@ -93,7 +93,8 @@ module "postgresql" {
   region     = var.gcp_region
 
   # Pass the ACTUAL value to create the user
-  db_password = data.google_secret_manager_secret_version.db_password.secret_data
+  db_password    = data.google_secret_manager_secret_version.db_password.secret_data
+  vpc_network_id = var.vpc_network_id
 }
 
 # --- Service Module Calls ---
