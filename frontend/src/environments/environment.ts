@@ -15,14 +15,12 @@
  */
 
 export const environment = {
-  firebase: {
-    apiKey: '',
-    authDomain: '',
-    projectId: '',
-    storageBucket: '',
-    messagingSenderId: '',
-    appId: '',
-    measurementId: '',
+  okta: {
+    clientId: '0oa15oarm1xsvWAUj698',
+    issuer: 'https://integrator-2746482-admin.okta.com/oauth2/default',
+    redirectUri: window.location.origin + '/login/callback',
+    postLogoutRedirectUri: window.location.origin,
+    scopes: ['openid', 'profile', 'email', 'groups'],
   },
   production: true,
   isLocal: false,
@@ -30,5 +28,4 @@ export const environment = {
   EMAIL_REGEX:
     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
   ADMIN: 'admin',
-  GOOGLE_CLIENT_ID: '',
 };

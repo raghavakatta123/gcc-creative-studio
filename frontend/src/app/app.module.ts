@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {importProvidersFrom, Injector, NgModule} from '@angular/core';
-import {initializeApp, provideFirebaseApp} from '@angular/fire/app';
-import {getAuth, provideAuth} from '@angular/fire/auth';
-import {getFirestore, provideFirestore} from '@angular/fire/firestore';
+import {Injector, NgModule} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatChipsModule} from '@angular/material/chips';
 import {MatDatepickerModule} from '@angular/material/datepicker';
@@ -45,16 +42,6 @@ import {
   provideHttpClient,
   withInterceptorsFromDi,
 } from '@angular/common/http';
-import {getAnalytics, provideAnalytics} from '@angular/fire/analytics';
-import {AngularFireModule} from '@angular/fire/compat';
-import {
-  AngularFireAnalyticsModule,
-  ScreenTrackingService,
-  UserTrackingService,
-} from '@angular/fire/compat/analytics';
-import {AngularFireAuthModule} from '@angular/fire/compat/auth';
-import {AngularFireDatabaseModule} from '@angular/fire/compat/database';
-import {AngularFirestoreModule} from '@angular/fire/compat/firestore';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {MatCardModule} from '@angular/material/card';
@@ -76,6 +63,9 @@ import {AppComponent} from './app.component';
 import {AudioComponent} from './audio/audio.component';
 import {AuthInterceptor} from './auth.interceptor';
 
+import {OktaAuthModule, OKTA_CONFIG} from '@okta/okta-angular';
+import OktaAuth from '@okta/okta-auth-js';
+
 import {FlowPromptBoxComponent} from './common/components/flow-prompt-box/flow-prompt-box.component';
 import {ImageCropperDialogComponent} from './common/components/image-cropper-dialog/image-cropper-dialog.component';
 import {ImageSelectorComponent} from './common/components/image-selector/image-selector.component';
@@ -91,6 +81,7 @@ import {MediaGalleryComponent} from './gallery/media-gallery/media-gallery.compo
 import {HeaderComponent} from './header/header.component';
 import {HomeComponent} from './home/home.component';
 import {LoginComponent} from './login/login.component';
+import {LoginCallbackComponent} from './login/login-callback.component';
 import {VideoComponent} from './video/video.component';
 import {VtoComponent} from './vto/vto.component';
 import {WorkbenchComponent} from './workbench/workbench.component';
@@ -108,6 +99,15 @@ import {WorkflowListComponent} from './workflows/workflow-list/workflow-list.com
 import {WorkflowStatusPipe} from './workflows/workflow-status.pipe';
 import {UpscaleComponent} from './upscale/upscale.component';
 
+const oktaAuth = new OktaAuth({
+  clientId: environment.okta.clientId,
+  issuer: environment.okta.issuer,
+  redirectUri: environment.okta.redirectUri,
+  postLogoutRedirectUri: environment.okta.postLogoutRedirectUri,
+  scopes: environment.okta.scopes,
+  pkce: true,
+});
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -115,6 +115,7 @@ import {UpscaleComponent} from './upscale/upscale.component';
     FooterComponent,
     HomeComponent,
     LoginComponent,
+    LoginCallbackComponent,
     FunTemplatesComponent,
     VideoComponent,
     MediaGalleryComponent,
@@ -183,27 +184,12 @@ import {UpscaleComponent} from './upscale/upscale.component';
     MatPaginatorModule,
     ClipboardModule,
     WorkflowStatusPipe,
+    OktaAuthModule,
   ],
   providers: [
     provideClientHydration(),
     provideHttpClient(withInterceptorsFromDi()),
-    provideFirebaseApp(() => initializeApp(environment.firebase)),
-    provideAuth(() => getAuth()),
-    provideFirestore(() => getFirestore()),
-    provideAnalytics(() => getAnalytics()),
-    importProvidersFrom([
-      AngularFireModule.initializeApp(environment.firebase),
-      AngularFireAuthModule,
-      AngularFirestoreModule,
-      AngularFireDatabaseModule,
-      AngularFireAnalyticsModule,
-    ]),
-    {
-      provide: ScreenTrackingService, // Automatically track screen views
-    },
-    {
-      provide: UserTrackingService, // Automatically track user interactions
-    },
+    {provide: OKTA_CONFIG, useValue: {oktaAuth}},
     {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
   ],
   bootstrap: [AppComponent],

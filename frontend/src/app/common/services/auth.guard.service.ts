@@ -29,6 +29,7 @@ import {isPlatformBrowser} from '@angular/common';
 import {Observable, of} from 'rxjs';
 
 const LOGIN_ROUTE = '/login';
+
 @Injectable({
   providedIn: 'root',
 })

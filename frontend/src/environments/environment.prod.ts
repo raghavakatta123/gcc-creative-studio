@@ -15,14 +15,12 @@
  */
 
 export const environment = {
-  firebase: {
-    apiKey: 'FIREBASE_API_KEY_PLACEHOLDER',
-    authDomain: 'FIREBASE_AUTH_DOMAIN_PLACEHOLDER',
-    projectId: 'FIREBASE_PROJECT_ID_PLACEHOLDER',
-    storageBucket: 'FIREBASE_STORAGE_BUCKET_PLACEHOLDER',
-    messagingSenderId: 'FIREBASE_SENDER_ID_PLACEHOLDER',
-    appId: 'FIREBASE_APP_ID_PLACEHOLDER',
-    measurementId: 'FIREBASE_MEASUREMENT_ID_PLACEHOLDER',
+  okta: {
+    clientId: '0oa15oarm1xsvWAUj698',
+    issuer: 'https://integrator-2746482-admin.okta.com/oauth2/default',
+    redirectUri: window.location.origin + '/login/callback',
+    postLogoutRedirectUri: window.location.origin,
+    scopes: ['openid', 'profile', 'email', 'groups'],
   },
   production: true,
   isLocal: false,
@@ -30,5 +28,4 @@ export const environment = {
   EMAIL_REGEX:
     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
   ADMIN: 'admin',
-  GOOGLE_CLIENT_ID: 'GOOGLE_CLIENT_ID_PLACEHOLDER',
 };

@@ -47,7 +47,12 @@ class ConfigService(BaseSettings):
     LOG_LEVEL: str = "INFO"
     INIT_VERTEX: bool = True
 
-    # --- Google Identity ---
+    # --- Okta Identity ---
+    OKTA_ISSUER: str = "https://integrator-2746482-admin.okta.com/oauth2/default"
+    OKTA_CLIENT_ID: str = "0oa15oarm1xsvWAUj698"
+    OKTA_ALLOWED_GROUPS_STR: str = "Creative-Studio"
+
+    # --- Google Identity (deprecated, kept for reference) ---
     GOOGLE_TOKEN_AUDIENCE: str = ""
     ALLOWED_ORGS_STR: str = Field(
         default="", alias="IDENTITY_PLATFORM_ALLOWED_ORGS"
@@ -139,6 +144,16 @@ class ConfigService(BaseSettings):
             org.strip()
             for org in self.ALLOWED_ORGS_STR.split(",")
             if org.strip()
+        )
+
+    @computed_field
+    @property
+    def OKTA_ALLOWED_GROUPS(self) -> set[str]:
+        """Parses the comma-separated OKTA_ALLOWED_GROUPS_STR into a set."""
+        return set(
+            group.strip()
+            for group in self.OKTA_ALLOWED_GROUPS_STR.split(",")
+            if group.strip()
         )
 
     @computed_field
