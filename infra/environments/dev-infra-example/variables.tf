@@ -39,12 +39,6 @@ variable "frontend_service_name" {
   description = "The full name of the frontend Cloud Run service for this environment."
 }
 
-variable "firebase_site_id" {
-  type        = string
-  description = "The site ID for the Firebase Hosting site. Must be unique across all Firebase projects."
-  default     = ""
-}
-
 # --- GitHub Repo Details ---
 variable "github_conn_name" {
   type        = string
@@ -98,13 +92,13 @@ variable "fe_build_substitutions" {
 variable "frontend_secrets" {
   type        = list(string)
   description = "A list of secret names required by the frontend build."
-  default = []
+  default     = []
 }
 
 variable "backend_secrets" {
   type        = list(string)
   description = "A list of secret names required by the backend build."
-  default = []
+  default     = []
 }
 
 variable "backend_runtime_secrets" {

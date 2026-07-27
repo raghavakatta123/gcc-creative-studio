@@ -103,12 +103,12 @@ variable "source_repository_id" {
 }
 
 variable "cpu" {
-  type = string
+  type    = string
   default = "2000m"
 }
 
 variable "memory" {
-  type = string
+  type    = string
   default = "2048Mi"
 }
 
@@ -122,10 +122,24 @@ variable "runtime_secrets" {
 variable "cloud_sql_connection_name" {
   description = "Cloud SQL Instance Connection Name"
   type        = string
+  default     = ""
 }
 variable "db_secret_id" {
   description = "Secret Manager Secret ID for DB Password"
   type        = string
+  default     = ""
 }
-variable "db_name" { type = string }
-variable "db_user" { type = string }
+variable "db_name" {
+  type    = string
+  default = ""
+}
+variable "db_user" {
+  type    = string
+  default = ""
+}
+
+variable "enable_cloud_sql" {
+  description = "Whether to enable Cloud SQL integration (volumes, env vars, IAM)."
+  type        = bool
+  default     = true
+}

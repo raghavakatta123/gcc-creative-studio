@@ -15,8 +15,8 @@
 # 1. Creates the Firebase Hosting site to deploy to
 resource "google_firebase_hosting_site" "this" {
   provider = google-beta
-  project = var.firebase_project_id
-  site_id = var.firebase_site_id
+  project  = var.firebase_project_id
+  site_id  = var.firebase_site_id
 }
 
 # 2. Create a dedicated Service Account for the frontend trigger

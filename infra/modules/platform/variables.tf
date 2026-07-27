@@ -16,13 +16,6 @@ variable "gcp_project_id" { type = string }
 variable "gcp_region" { type = string }
 variable "environment" { type = string }
 
-
-variable "firebase_site_id" {
-  type        = string
-  description = "The site ID for the Firebase Hosting site. Must be unique across all Firebase projects."
-  default     = ""
-}
-
 # Backend specific variables
 variable "backend_service_name" { type = string }
 variable "backend_custom_audiences" { type = list(string) }
@@ -51,22 +44,22 @@ variable "github_repo_name" { type = string }
 variable "github_branch_name" { type = string }
 
 variable "be_cpu" {
-  type = string
+  type    = string
   default = "2000m"
 }
 
 variable "be_memory" {
-  type = string
+  type    = string
   default = "2048Mi"
 }
 
 variable "fe_cpu" {
-  type = string
+  type    = string
   default = "2000m"
 }
 
 variable "fe_memory" {
-  type = string
+  type    = string
   default = "2048Mi"
 }
 

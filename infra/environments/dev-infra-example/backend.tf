@@ -14,7 +14,7 @@
 
 terraform {
   backend "gcs" {
-    bucket = "cstudio-infra-example-cstudio-dev-tfstate"
+    bucket = "vpc-shared-project-482119-cstudio-tfstate"
     prefix = "infra/dev/state"
   }
 }

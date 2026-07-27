@@ -1,21 +1,20 @@
-gcp_project_id = "YOUR_GCP_PROJECT_ID"
+gcp_project_id = "vpc-shared-project-482119"
 gcp_region     = "us-central1"
 environment    = "development"
 
 # --- Service Names ---
 backend_service_name  = "cstudio-backend-dev"
-frontend_service_name = "cstudio-frontend-dev" # This is the Cloud Run service name
-firebase_site_id      = "YOUR_FIREBASE_SITE_ID" # (Optional) Custom Firebase Hosting Site ID, defaults to the gcp_project_id
+frontend_service_name = "cstudio-frontend-dev" # Cloud Run service name for the frontend
 
 # --- GitHub Repo Details ---
-github_conn_name   = "gh-repo-owner-con"
-github_repo_owner  = "RepoOwnerName"
-github_repo_name   = "repo-owner-gcc-creative-studio"
-github_branch_name = "develop"
+github_conn_name   = "gh-creative-studio-con"
+github_repo_owner  = "raghavakatta123"
+github_repo_name   = "gcc-creative-studio"
+github_branch_name = "main"
 
 # --- Custom Audiences ---
-backend_custom_audiences  = ["YOUR_OAUTH_WEB_CLIENT_ID_HERE", "YOUR_GCP_PROJECT_ID"]
-frontend_custom_audiences = ["YOUR_OAUTH_WEB_CLIENT_ID_HERE", "YOUR_GCP_PROJECT_ID"]
+backend_custom_audiences  = ["vpc-shared-project-482119"]
+frontend_custom_audiences = ["vpc-shared-project-482119"]
 
 # --- Service-Specific Environment Variables ---
 be_env_vars = {
@@ -23,13 +22,13 @@ be_env_vars = {
     LOG_LEVEL = "INFO"
   }
   development = {
-    ENVIRONMENT  = "development"
-    GOOGLE_TOKEN_AUDIENCE = "YOUR_OAUTH_WEB_CLIENT_ID_HERE"
+    ENVIRONMENT                    = "development"
+    GOOGLE_TOKEN_AUDIENCE          = "vpc-shared-project-482119"
     IDENTITY_PLATFORM_ALLOWED_ORGS = "" # If empty then any org is allowed
   }
   production = {
-    ENVIRONMENT  = "production"
-    GOOGLE_TOKEN_AUDIENCE = "YOUR_OAUTH_WEB_CLIENT_ID_HERE"
+    ENVIRONMENT                    = "production"
+    GOOGLE_TOKEN_AUDIENCE          = "vpc-shared-project-482119"
     IDENTITY_PLATFORM_ALLOWED_ORGS = "" # If empty then any org is allowed
   }
 }
@@ -39,14 +38,14 @@ fe_build_substitutions = {
 }
 
 frontend_secrets = [
-  "FIREBASE_API_KEY",          # Your Firebase Web API Key
-  "FIREBASE_AUTH_DOMAIN",      # Your Firebase Auth Domain (e.g., project-id.firebaseapp.com)
-  "FIREBASE_PROJECT_ID",       # Your Firebase Project ID
-  "FIREBASE_STORAGE_BUCKET",   # Your Firebase Storage Bucket (e.g., project-id.appspot.com)
+  "FIREBASE_API_KEY",             # Your Firebase Web API Key
+  "FIREBASE_AUTH_DOMAIN",         # Your Firebase Auth Domain (e.g., project-id.firebaseapp.com)
+  "FIREBASE_PROJECT_ID",          # Your Firebase Project ID
+  "FIREBASE_STORAGE_BUCKET",      # Your Firebase Storage Bucket (e.g., project-id.appspot.com)
   "FIREBASE_MESSAGING_SENDER_ID", # Your Firebase Cloud Messaging Sender ID
-  "FIREBASE_APP_ID",           # Your Firebase Web App ID
-  "FIREBASE_MEASUREMENT_ID",   # Your Google Analytics Measurement ID
-  "GOOGLE_CLIENT_ID",          # Your Google OAuth 2.0 Client ID for web
+  "FIREBASE_APP_ID",              # Your Firebase Web App ID
+  "FIREBASE_MEASUREMENT_ID",      # Your Google Analytics Measurement ID
+  "GOOGLE_CLIENT_ID",             # Your Google OAuth 2.0 Client ID for web
 ]
 
 backend_secrets = [

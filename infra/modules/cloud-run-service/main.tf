@@ -32,19 +32,24 @@ resource "google_artifact_registry_repository" "repo" {
 }
 
 resource "google_cloud_run_v2_service" "this" {
-  name             = var.service_name
-  location         = var.gcp_region
-  custom_audiences = var.custom_audiences
+  name                = var.service_name
+  location            = var.gcp_region
+  custom_audiences    = var.custom_audiences
   deletion_protection = false
 
   template {
     service_account = google_service_account.run_sa.email
-    volumes {
-      name = "cloudsql"
-      cloud_sql_instance {
-        instances = [var.cloud_sql_connection_name]
+
+    dynamic "volumes" {
+      for_each = var.enable_cloud_sql ? [1] : []
+      content {
+        name = "cloudsql"
+        cloud_sql_instance {
+          instances = [var.cloud_sql_connection_name]
+        }
       }
     }
+
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello:latest"
       resources {
@@ -54,29 +59,45 @@ resource "google_cloud_run_v2_service" "this" {
         }
       }
 
-      env {
-        name = "INSTANCE_CONNECTION_NAME"
-        value = var.cloud_sql_connection_name
+      # Database environment variables (only when Cloud SQL is enabled)
+      dynamic "env" {
+        for_each = var.enable_cloud_sql ? [1] : []
+        content {
+          name  = "INSTANCE_CONNECTION_NAME"
+          value = var.cloud_sql_connection_name
+        }
       }
-      env {
-        name = "DB_HOST"
-        value = "/cloudsql/${var.cloud_sql_connection_name}"
+      dynamic "env" {
+        for_each = var.enable_cloud_sql ? [1] : []
+        content {
+          name  = "DB_HOST"
+          value = "/cloudsql/${var.cloud_sql_connection_name}"
+        }
       }
-      env {
-        name = "DB_NAME"
-        value = var.db_name
+      dynamic "env" {
+        for_each = var.enable_cloud_sql ? [1] : []
+        content {
+          name  = "DB_NAME"
+          value = var.db_name
+        }
       }
-      env {
-        name = "DB_USER"
-        value = var.db_user
+      dynamic "env" {
+        for_each = var.enable_cloud_sql ? [1] : []
+        content {
+          name  = "DB_USER"
+          value = var.db_user
+        }
       }
 
-      env {
-        name = "DB_PASS"
-        value_source {
-          secret_key_ref {
-            secret = var.db_secret_id
-            version = "latest"
+      dynamic "env" {
+        for_each = var.enable_cloud_sql ? [1] : []
+        content {
+          name = "DB_PASS"
+          value_source {
+            secret_key_ref {
+              secret  = var.db_secret_id
+              version = "latest"
+            }
           }
         }
       }
@@ -109,9 +130,12 @@ resource "google_cloud_run_v2_service" "this" {
         }
       }
 
-      volume_mounts {
-        name = "cloudsql"
-        mount_path = "/cloudsql"
+      dynamic "volume_mounts" {
+        for_each = var.enable_cloud_sql ? [1] : []
+        content {
+          name       = "cloudsql"
+          mount_path = "/cloudsql"
+        }
       }
     }
     scaling {
@@ -130,7 +154,7 @@ resource "google_cloudbuild_trigger" "this" {
   location        = var.gcp_region
   service_account = google_service_account.trigger_sa.id
   filename        = var.cloudbuild_yaml_path
-  substitutions   = merge(var.build_substitutions, {
+  substitutions = merge(var.build_substitutions, {
     _REPO_NAME = google_artifact_registry_repository.repo.name
   })
 
@@ -196,13 +220,15 @@ resource "google_project_iam_member" "sa_token_creator_binding" {
 }
 
 resource "google_secret_manager_secret_iam_member" "db_password_access" {
+  count     = var.enable_cloud_sql ? 1 : 0
   secret_id = var.db_secret_id
   role      = "roles/secretmanager.secretAccessor"
-  member  = "serviceAccount:${google_service_account.run_sa.email}"
+  member    = "serviceAccount:${google_service_account.run_sa.email}"
 }
 
 # This is required for the Cloud Run instance to talk to the Cloud SQL Auth Proxy
 resource "google_project_iam_member" "cloudsql_client" {
+  count   = var.enable_cloud_sql ? 1 : 0
   project = var.gcp_project_id
   role    = "roles/cloudsql.client"
   member  = "serviceAccount:${google_service_account.run_sa.email}"
