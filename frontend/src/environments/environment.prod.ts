@@ -19,7 +19,7 @@ const origin = typeof window !== 'undefined' ? window.location.origin : '';
 export const environment = {
   okta: {
     clientId: '0oa15oarm1xsvWAUj698',
-    issuer: 'https://integrator-2746482-admin.okta.com/oauth2/default',
+    issuer: 'https://integrator-2746482.okta.com/oauth2/default',
     redirectUri: origin + '/login/callback',
     postLogoutRedirectUri: origin,
     scopes: ['openid', 'profile', 'email', 'groups'],

@@ -48,7 +48,7 @@ class ConfigService(BaseSettings):
     INIT_VERTEX: bool = True
 
     # --- Okta Identity ---
-    OKTA_ISSUER: str = "https://integrator-2746482-admin.okta.com/oauth2/default"
+    OKTA_ISSUER: str = "https://integrator-2746482.okta.com/oauth2/default"
     OKTA_CLIENT_ID: str = "0oa15oarm1xsvWAUj698"
     OKTA_ALLOWED_GROUPS_STR: str = "Creative-Studio"
 
