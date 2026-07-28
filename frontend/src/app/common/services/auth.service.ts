@@ -45,7 +45,9 @@ export class AuthService {
    * Initiates Okta login via redirect-based PKCE flow.
    */
   signIn(): void {
-    this.oktaAuth.signInWithRedirect();
+    this.oktaAuth.signInWithRedirect({
+      scopes: ['openid', 'profile', 'email', 'groups'],
+    });
   }
 
   /**
@@ -53,7 +55,10 @@ export class AuthService {
    * Parses tokens from the URL and stores them in the token manager.
    */
   async handleCallback(): Promise<void> {
-    await this.oktaAuth.handleLoginRedirect();
+    if (this.oktaAuth.isLoginRedirect()) {
+      const tokens = await this.oktaAuth.token.parseFromUrl();
+      this.oktaAuth.tokenManager.setTokens(tokens.tokens);
+    }
   }
 
   /**
