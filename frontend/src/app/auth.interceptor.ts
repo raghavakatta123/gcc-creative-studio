@@ -34,27 +34,30 @@ export class AuthInterceptor implements HttpInterceptor {
     request: HttpRequest<unknown>,
     next: HttpHandler,
   ): Observable<HttpEvent<unknown>> {
-    // Get the Okta access token and attach it to outgoing API requests.
-    return this.authService.getAccessToken$().pipe(
-      switchMap(token => {
-        const authorizedRequest = request.clone({
-          setHeaders: {Authorization: `Bearer ${token}`},
-        });
-        return next.handle(authorizedRequest);
-      }),
+    // Skip auth for non-API requests or when on login/callback pages
+    if (!request.url.includes('/api')) {
+      return next.handle(request);
+    }
+
+    // Try to get the access token
+    const token = this.authService.getAccessToken();
+
+    // If no token, pass request without auth header (backend will return 401)
+    if (!token) {
+      return next.handle(request);
+    }
+
+    // Attach token to the request
+    const authorizedRequest = request.clone({
+      setHeaders: {Authorization: `Bearer ${token}`},
+    });
+
+    return next.handle(authorizedRequest).pipe(
       catchError(error => {
-        // If the error is NOT an HttpErrorResponse, it's a token retrieval failure.
-        // In this case, the session is invalid, and we should log out.
-        if (!(error instanceof HttpErrorResponse)) {
-          console.error(
-            'AuthInterceptor: No valid access token. Logging out.',
-            error,
-          );
+        // If 401 from backend, the token is invalid/expired
+        if (error instanceof HttpErrorResponse && error.status === 401) {
           void this.authService.logout();
         }
-
-        // Otherwise, it's a backend API error (e.g., 404, 500). We should NOT log out.
-        // We just re-throw the original HttpErrorResponse so the calling service can handle it.
         return throwError(() => error);
       }),
     );
