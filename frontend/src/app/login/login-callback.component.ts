@@ -31,15 +31,27 @@ export class LoginCallbackComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     try {
-      // Parse tokens from the callback URL
-      const tokenResponse = await this.oktaAuth.token.parseFromUrl();
-      // Store tokens in the token manager
-      this.oktaAuth.tokenManager.setTokens(tokenResponse.tokens);
-      // Navigate to home
-      this.router.navigate(['/']);
+      // Check if this is actually a login redirect
+      if (this.oktaAuth.isLoginRedirect()) {
+        // storeTokensFromRedirect handles the full PKCE exchange
+        await this.oktaAuth.storeTokensFromRedirect();
+      }
+
+      // Verify we got tokens
+      const isAuthenticated = await this.oktaAuth.isAuthenticated();
+      if (isAuthenticated) {
+        this.router.navigate(['/']);
+      } else {
+        console.error('Not authenticated after callback');
+        this.router.navigate(['/login']);
+      }
     } catch (error) {
       console.error('Login callback error:', error);
-      this.router.navigate(['/login']);
+      // Show the error in the page for debugging
+      document.body.innerHTML = '<pre style="color:red;padding:20px;">' +
+        'Login callback error:\n' + JSON.stringify(error, null, 2) +
+        '\n\nURL: ' + window.location.href +
+        '</pre>';
     }
   }
 }

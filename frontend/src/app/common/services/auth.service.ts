@@ -45,9 +45,7 @@ export class AuthService {
    * Initiates Okta login via redirect-based PKCE flow.
    */
   signIn(): void {
-    this.oktaAuth.signInWithRedirect({
-      scopes: ['openid', 'profile', 'email', 'groups'],
-    });
+    this.oktaAuth.signInWithRedirect();
   }
 
   /**

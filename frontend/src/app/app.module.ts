@@ -106,6 +106,10 @@ const oktaAuth = new OktaAuth({
   postLogoutRedirectUri: window.location.origin,
   scopes: environment.okta.scopes,
   pkce: true,
+  responseMode: 'query',
+  tokenManager: {
+    storage: 'localStorage',
+  },
 });
 
 @NgModule({
