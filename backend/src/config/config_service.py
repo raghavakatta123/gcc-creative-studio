@@ -50,6 +50,7 @@ class ConfigService(BaseSettings):
     # --- Okta Identity ---
     OKTA_ISSUER: str = "https://integrator-2746482.okta.com/oauth2/default"
     OKTA_CLIENT_ID: str = "0oa15oarm1xsvWAUj698"
+    OKTA_AUDIENCE: str = "api://default"
     OKTA_ALLOWED_GROUPS_STR: str = "Creative-Studio"
 
     # --- Google Identity (deprecated, kept for reference) ---

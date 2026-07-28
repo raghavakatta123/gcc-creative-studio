@@ -30,7 +30,7 @@ class OktaClient:
     def __init__(self):
         """Initializes the JWKS client pointing to the Okta JWKS endpoint."""
         self._issuer = config_service.OKTA_ISSUER
-        self._audience = config_service.OKTA_CLIENT_ID
+        self._audience = config_service.OKTA_AUDIENCE
         self._jwks_uri = f"{self._issuer}/v1/keys"
 
         logger.info(
