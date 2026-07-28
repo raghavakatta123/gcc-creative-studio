@@ -1,57 +1,64 @@
 /**
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Debug version - shows all info, does NOT redirect
  */
-
 import {Component, OnInit, Inject} from '@angular/core';
-import {Router} from '@angular/router';
 import {OKTA_AUTH} from '@okta/okta-angular';
 import OktaAuth from '@okta/okta-auth-js';
 
 @Component({
   selector: 'app-login-callback',
-  template: '<p style="color:white;text-align:center;margin-top:50px;">Signing in...</p>',
+  template: '<pre style="color:lime;background:black;padding:20px;font-size:12px;white-space:pre-wrap;">{{debugInfo}}</pre>',
 })
 export class LoginCallbackComponent implements OnInit {
+  debugInfo = 'Loading...';
+
   constructor(
     @Inject(OKTA_AUTH) private oktaAuth: OktaAuth,
-    private router: Router,
   ) {}
 
   async ngOnInit(): Promise<void> {
-    try {
-      // Check if this is actually a login redirect
-      if (this.oktaAuth.isLoginRedirect()) {
-        // storeTokensFromRedirect handles the full PKCE exchange
-        await this.oktaAuth.storeTokensFromRedirect();
-      }
+    const info: string[] = [];
 
-      // Verify we got tokens
-      const isAuthenticated = await this.oktaAuth.isAuthenticated();
-      if (isAuthenticated) {
-        this.router.navigate(['/']);
-      } else {
-        console.error('Not authenticated after callback');
-        this.router.navigate(['/login']);
-      }
-    } catch (error) {
-      console.error('Login callback error:', error);
-      // Show the error in the page for debugging
-      document.body.innerHTML = '<pre style="color:red;padding:20px;">' +
-        'Login callback error:\n' + JSON.stringify(error, null, 2) +
-        '\n\nURL: ' + window.location.href +
-        '</pre>';
+    info.push('=== OKTA CALLBACK DEBUG ===');
+    info.push('');
+    info.push('1. Current URL: ' + window.location.href);
+    info.push('2. Origin: ' + window.location.origin);
+    info.push('3. Search params: ' + window.location.search);
+    info.push('4. Hash: ' + window.location.hash);
+    info.push('');
+    info.push('5. isLoginRedirect(): ' + this.oktaAuth.isLoginRedirect());
+    info.push('');
+    info.push('6. OktaAuth config:');
+    info.push('   - clientId: ' + (this.oktaAuth as any).options?.clientId);
+    info.push('   - issuer: ' + (this.oktaAuth as any).options?.issuer);
+    info.push('   - redirectUri: ' + (this.oktaAuth as any).options?.redirectUri);
+    info.push('   - pkce: ' + (this.oktaAuth as any).options?.pkce);
+    info.push('   - responseMode: ' + (this.oktaAuth as any).options?.responseMode);
+    info.push('');
+    info.push('7. SessionStorage keys: ' + Object.keys(sessionStorage).join(', '));
+    info.push('8. LocalStorage okta keys: ' + Object.keys(localStorage).filter(k => k.includes('okta')).join(', '));
+    info.push('');
+
+    this.debugInfo = info.join('\n');
+
+    // Now try the token exchange
+    info.push('9. Attempting storeTokensFromRedirect()...');
+    this.debugInfo = info.join('\n');
+
+    try {
+      await this.oktaAuth.storeTokensFromRedirect();
+      info.push('   ✅ SUCCESS!');
+      info.push('');
+      info.push('10. isAuthenticated: ' + await this.oktaAuth.isAuthenticated());
+      info.push('11. Access Token: ' + (this.oktaAuth.getAccessToken() ? 'EXISTS (' + this.oktaAuth.getAccessToken()?.substring(0, 20) + '...)' : 'NULL'));
+    } catch (error: any) {
+      info.push('   ❌ FAILED: ' + (error?.message || JSON.stringify(error)));
+      info.push('   Error name: ' + error?.name);
+      info.push('   Error stack: ' + error?.stack?.substring(0, 200));
     }
+
+    info.push('');
+    info.push('=== END DEBUG ===');
+    this.debugInfo = info.join('\n');
   }
 }
