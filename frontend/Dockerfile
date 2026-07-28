@@ -17,7 +17,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY . /app/
 
-RUN npm ci
+RUN npm install
 RUN npm run build --configuration=production
 
 FROM nginx:alpine
