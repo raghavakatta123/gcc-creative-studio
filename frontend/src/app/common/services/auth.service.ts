@@ -116,7 +116,7 @@ export class AuthService {
       localStorage.removeItem(USER_DETAILS);
       localStorage.removeItem('showTooltip');
       await this.oktaAuth.signOut({
-        postLogoutRedirectUri: environment.okta.postLogoutRedirectUri,
+        postLogoutRedirectUri: window.location.origin,
       });
     } catch (e) {
       console.error('Sign Out Error', e);
