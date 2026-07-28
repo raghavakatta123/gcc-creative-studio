@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
+const origin = typeof window !== 'undefined' ? window.location.origin : '';
+
 export const environment = {
   okta: {
     clientId: '0oa15oarm1xsvWAUj698',
     issuer: 'https://integrator-2746482-admin.okta.com/oauth2/default',
-    redirectUri: window.location.origin + '/login/callback',
-    postLogoutRedirectUri: window.location.origin,
+    redirectUri: origin + '/login/callback',
+    postLogoutRedirectUri: origin,
     scopes: ['openid', 'profile', 'email', 'groups'],
   },
   production: true,
   isLocal: false,
-  backendURL: 'BACKEND_URL_PLACEHOLDER',
+  backendURL: '/api',
   EMAIL_REGEX:
     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
   ADMIN: 'admin',
