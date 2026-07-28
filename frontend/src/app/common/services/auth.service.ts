@@ -18,7 +18,7 @@ import {Injectable, Inject, PLATFORM_ID} from '@angular/core';
 import {Router} from '@angular/router';
 import {HttpClient, HttpHeaders, HttpErrorResponse} from '@angular/common/http';
 import {environment} from '../../../environments/environment';
-import {UserModel} from '../models/user.model';
+import {UserModel, UserRolesEnum} from '../models/user.model';
 import {UserService} from '../services/user.service';
 import {Observable, from, throwError, of} from 'rxjs';
 import {catchError, tap, map, switchMap} from 'rxjs/operators';
@@ -162,13 +162,13 @@ export class AuthService {
   isUserAdmin(): boolean {
     if (!isPlatformBrowser(this.platformId)) return false;
     const user_role = this.userService.getUserDetails()?.roles;
-    return user_role?.includes('admin') || false;
+    return user_role?.includes(UserRolesEnum.ADMIN) || false;
   }
 
   isUserWorkflows(): boolean {
     if (!isPlatformBrowser(this.platformId)) return false;
     const user_role = this.userService.getUserDetails()?.roles;
-    return user_role?.includes('workflows') || false;
+    return user_role?.includes(UserRolesEnum.WORKFLOWS) || false;
   }
 
   /**

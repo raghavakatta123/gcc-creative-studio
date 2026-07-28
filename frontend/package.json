@@ -15,9 +15,6 @@
     "clean": "gts clean",
     "compile": "tsc --noEmit",
     "fix": "gts fix",
-    "prepare": "npm run compile",
-    "pretest": "npm run compile",
-    "posttest": "npm run lint",
     "format": "prettier --write \"src/**/*.{ts,html,scss,json}\"",
     "check-format": "prettier --check \"src/**/*.{ts,html,scss,json}\""
   },
