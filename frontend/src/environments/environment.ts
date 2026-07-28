@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-const origin = typeof window !== 'undefined' ? window.location.origin : '';
-
 export const environment = {
   okta: {
     clientId: '0oa15ny5lt079rs4Z698',
     issuer: 'https://integrator-2746482.okta.com/oauth2/default',
-    redirectUri: origin + '/login/callback',
-    postLogoutRedirectUri: origin,
     scopes: ['openid', 'profile', 'email', 'groups'],
   },
   production: false,

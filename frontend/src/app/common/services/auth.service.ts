@@ -55,9 +55,17 @@ export class AuthService {
    * Parses tokens from the URL and stores them in the token manager.
    */
   async handleCallback(): Promise<void> {
-    if (this.oktaAuth.isLoginRedirect()) {
+    try {
       const tokens = await this.oktaAuth.token.parseFromUrl();
       this.oktaAuth.tokenManager.setTokens(tokens.tokens);
+    } catch (error) {
+      // If parseFromUrl fails, try handleRedirect as fallback
+      try {
+        await this.oktaAuth.handleRedirect();
+      } catch (e) {
+        console.error('handleCallback failed:', e);
+        throw e;
+      }
     }
   }
 

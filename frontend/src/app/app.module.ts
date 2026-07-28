@@ -81,7 +81,6 @@ import {MediaGalleryComponent} from './gallery/media-gallery/media-gallery.compo
 import {HeaderComponent} from './header/header.component';
 import {HomeComponent} from './home/home.component';
 import {LoginComponent} from './login/login.component';
-import {LoginCallbackComponent} from './login/login-callback.component';
 import {VideoComponent} from './video/video.component';
 import {VtoComponent} from './vto/vto.component';
 import {WorkbenchComponent} from './workbench/workbench.component';
@@ -102,8 +101,8 @@ import {UpscaleComponent} from './upscale/upscale.component';
 const oktaAuth = new OktaAuth({
   clientId: environment.okta.clientId,
   issuer: environment.okta.issuer,
-  redirectUri: environment.okta.redirectUri,
-  postLogoutRedirectUri: environment.okta.postLogoutRedirectUri,
+  redirectUri: window.location.origin + '/login/callback',
+  postLogoutRedirectUri: window.location.origin,
   scopes: environment.okta.scopes,
   pkce: true,
 });
@@ -115,7 +114,6 @@ const oktaAuth = new OktaAuth({
     FooterComponent,
     HomeComponent,
     LoginComponent,
-    LoginCallbackComponent,
     FunTemplatesComponent,
     VideoComponent,
     MediaGalleryComponent,
