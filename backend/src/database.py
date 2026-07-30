@@ -89,7 +89,7 @@ class DatabaseConnector:
         if self._connector is None:
             # Explicitly use the running loop to avoid ConnectorLoopError
             # during asyncio.run()
-            self._connector = Connector(loop=asyncio.get_running_loop())
+            self._connector = Connector(loop=asyncio.get_running_loop(), ip_type=IPTypes.PUBLIC)
         return self._connector
 
     async def cleanup(self):
@@ -192,7 +192,7 @@ class WorkerDatabase:
             and not config_service.USE_CLOUD_SQL_AUTH_PROXY
         ):
             # Create a fresh Connector for the current (worker) loop
-            self.connector = Connector(loop=asyncio.get_running_loop())
+            self.connector = Connector(loop=asyncio.get_running_loop(), ip_type=IPTypes.PUBLIC)
 
             async def get_conn():
                 return await self.connector.connect_async(
