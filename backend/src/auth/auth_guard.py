@@ -77,7 +77,7 @@ async def get_current_user(
         email = decoded_token.get("email")
         name = decoded_token.get("name")
         picture = decoded_token.get("picture", "")
-        token_info_hd = decoded_token.get("hd")
+        token_info_hd = decoded_token.get("hd") or (email.split("@")[1] if email and "@" in email else None)
 
         # Restrict by particular organizations if it's a closed environment
         if not email:
