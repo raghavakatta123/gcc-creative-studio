@@ -95,14 +95,14 @@ async def lifespan(app: FastAPI):
     # --- Startup ---
     logger.info("Starting up application...")
 
-    # Initialize Okta JWKS Client (Auth)
+    # Initialize Firebase Admin SDK (Auth only)
     try:
-        from src.auth.okta_client_service import okta_client
+        from src.auth.firebase_client_service import firebase_client
 
         # Trigger initialization
-        _ = okta_client
+        _ = firebase_client
     except Exception as e:
-        logger.error(f"Failed to initialize Okta client: {e}")
+        logger.error(f"Failed to initialize Firebase: {e}")
 
     # Run Database Migrations
     try:

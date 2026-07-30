@@ -99,10 +99,10 @@ async def alembic_get_connection():
     loop = asyncio.get_running_loop()
 
     try:
-        connector = Connector(loop=loop, ip_type=IPTypes.PUBLIC)
+        connector = Connector(loop=loop)
     except TypeError:
         # Fallback if loop arg is not supported
-        connector = Connector(ip_type=IPTypes.PUBLIC)
+        connector = Connector()
 
     conn = await connector.connect_async(
         config_service.INSTANCE_CONNECTION_NAME,
