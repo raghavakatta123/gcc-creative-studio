@@ -15,30 +15,24 @@
  */
 
 import {TestBed} from '@angular/core/testing';
-import {AuthService} from './auth.service';
-import {OKTA_AUTH} from '@okta/okta-angular';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {RouterTestingModule} from '@angular/router/testing';
+import {Router} from '@angular/router';
+import {Auth} from '@angular/fire/auth';
+import {AuthService} from './auth.service';
+import {UserService} from './user.service';
 
 describe('AuthService', () => {
   let service: AuthService;
 
-  const mockOktaAuth = {
-    signInWithRedirect: jasmine.createSpy(),
-    handleLoginRedirect: jasmine.createSpy(),
-    getAccessToken: jasmine.createSpy().and.returnValue(null),
-    isAuthenticated: jasmine.createSpy().and.returnValue(Promise.resolve(false)),
-    signOut: jasmine.createSpy(),
-    tokenManager: {
-      getTokensSync: jasmine.createSpy().and.returnValue(null),
-      hasExpired: jasmine.createSpy().and.returnValue(true),
-    },
-  };
-
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, RouterTestingModule],
-      providers: [{provide: OKTA_AUTH, useValue: mockOktaAuth}],
+      imports: [HttpClientTestingModule],
+      providers: [
+        AuthService,
+        {provide: Router, useValue: {}},
+        {provide: UserService, useValue: {}},
+        {provide: Auth, useValue: {}},
+      ],
     });
     service = TestBed.inject(AuthService);
   });

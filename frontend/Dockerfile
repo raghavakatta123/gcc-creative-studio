@@ -17,8 +17,8 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY . /app/
 
-RUN npm install
-RUN npx ng build --configuration=production
+RUN npm ci
+RUN npm run build-dev
 
 FROM nginx:alpine
 COPY --from=builder /app/dist/creative-studio/browser /usr/share/nginx/html
@@ -29,7 +29,3 @@ COPY --from=builder /app/nginx.conf /etc/nginx/conf.d/default.conf
 RUN chown -R nginx:nginx /usr/share/nginx/html
 
 EXPOSE 8080
-
-# Cloud Run requires the container to listen on the PORT environment variable
-# nginx.conf is configured to listen on 8080 which is Cloud Run's default
-CMD ["nginx", "-g", "daemon off;"]

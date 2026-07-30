@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export interface Organization {
+import {DocumentData} from '@angular/fire/firestore';
+
+export interface Organization extends DocumentData {
   orgId: string;
   orgName: string;
   status: string;

@@ -62,7 +62,6 @@ export class AppComponent {
       if (event instanceof NavigationEnd) {
         if (
           event.url === '/login' ||
-          event.url === '/login/callback' ||
           event.url === '/login/e2e' ||
           (event.url.includes('login') && event.url.includes('email')) ||
           (event.url.includes('login') && event.url.includes('tos')) ||

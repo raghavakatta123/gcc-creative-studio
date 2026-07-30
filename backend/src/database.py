@@ -89,7 +89,7 @@ class DatabaseConnector:
         if self._connector is None:
             # Explicitly use the running loop to avoid ConnectorLoopError
             # during asyncio.run()
-            self._connector = Connector(loop=asyncio.get_running_loop(), ip_type=IPTypes.PUBLIC)
+            self._connector = Connector(loop=asyncio.get_running_loop())
         return self._connector
 
     async def cleanup(self):
@@ -101,18 +101,13 @@ class DatabaseConnector:
 async def get_connection():
     """Helper function to get a connection object for the AsyncEngine."""
     if config_service.USE_CLOUD_SQL_AUTH_PROXY:
-        # Cloud SQL Auth Proxy provides a Unix socket at DB_HOST path
-        # For asyncpg, host starting with "/" is treated as Unix socket directory
-        connect_kwargs = {
-            "user": config_service.DB_USER,
-            "password": config_service.DB_PASS,
-            "database": config_service.DB_NAME,
-            "host": config_service.DB_HOST,
-        }
-        # Only pass port if host is NOT a Unix socket path
-        if not config_service.DB_HOST.startswith("/"):
-            connect_kwargs["port"] = int(config_service.DB_PORT)
-        conn = await asyncpg.connect(**connect_kwargs)
+        conn = await asyncpg.connect(
+            user=config_service.DB_USER,
+            password=config_service.DB_PASS,
+            database=config_service.DB_NAME,
+            host=config_service.DB_HOST,
+            port=config_service.DB_PORT,
+        )
         return conn
 
     # If no instance connection name is provided, assume we are connecting
@@ -136,7 +131,7 @@ async def get_connection():
         user=config_service.DB_USER,
         password=config_service.DB_PASS,
         db=config_service.DB_NAME,
-        ip_type=IPTypes.PUBLIC,  # Using Public IP
+        ip_type=IPTypes.PUBLIC,  # Adjust if using Private IP
     )
 
     return conn
@@ -192,7 +187,7 @@ class WorkerDatabase:
             and not config_service.USE_CLOUD_SQL_AUTH_PROXY
         ):
             # Create a fresh Connector for the current (worker) loop
-            self.connector = Connector(loop=asyncio.get_running_loop(), ip_type=IPTypes.PUBLIC)
+            self.connector = Connector(loop=asyncio.get_running_loop())
 
             async def get_conn():
                 return await self.connector.connect_async(

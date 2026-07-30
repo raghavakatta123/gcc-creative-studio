@@ -25,6 +25,7 @@ import {
 import {Observable, throwError} from 'rxjs';
 import {catchError, switchMap} from 'rxjs/operators';
 import {AuthService} from './common/services/auth.service';
+import {environment} from '../environments/environment';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -34,30 +35,29 @@ export class AuthInterceptor implements HttpInterceptor {
     request: HttpRequest<unknown>,
     next: HttpHandler,
   ): Observable<HttpEvent<unknown>> {
-    // Skip auth for non-API requests or when on login/callback pages
-    if (!request.url.includes('/api')) {
-      return next.handle(request);
-    }
-
-    // Try to get the access token
-    const token = this.authService.getAccessToken();
-
-    // If no token, pass request without auth header (backend will return 401)
-    if (!token) {
-      return next.handle(request);
-    }
-
-    // Attach token to the request
-    const authorizedRequest = request.clone({
-      setHeaders: {Authorization: `Bearer ${token}`},
-    });
-
-    return next.handle(authorizedRequest).pipe(
+    // Asynchronously get a valid token. This will use the cache or trigger a silent refresh.
+    return this.authService.getValidIdentityPlatformToken$().pipe(
+      switchMap(token => {
+        // Token was retrieved successfully. Clone the request and add the auth header.
+        const authorizedRequest = request.clone({
+          setHeaders: {Authorization: `Bearer ${token}`},
+        });
+        return next.handle(authorizedRequest);
+      }),
       catchError(error => {
-        // If 401 from backend, the token is invalid/expired
-        if (error instanceof HttpErrorResponse && error.status === 401) {
+        // If the error is NOT an HttpErrorResponse, it's a token refresh failure
+        // from our AuthService. In this case, the session is invalid, and we should log out.
+        if (!(error instanceof HttpErrorResponse)) {
+          console.error(
+            'AuthInterceptor: Session expired and could not be refreshed. Logging out.',
+            error,
+          );
           void this.authService.logout();
         }
+
+        // Otherwise, it's a backend API error (e.g., 404, 500). We should NOT log out.
+        // We just re-throw the original HttpErrorResponse so the calling service
+        // (e.g., UserService) can handle it and display an appropriate error message.
         return throwError(() => error);
       }),
     );

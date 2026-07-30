@@ -15,15 +15,20 @@
  */
 
 export const environment = {
-  okta: {
-    clientId: '0oa15ny5lt079rs4Z698',
-    issuer: 'https://integrator-2746482.okta.com/oauth2/default',
-    scopes: ['openid', 'profile', 'email', 'groups'],
+  firebase: {
+    apiKey: '',
+    authDomain: '',
+    projectId: '',
+    storageBucket: '',
+    messagingSenderId: '',
+    appId: '',
+    measurementId: '',
   },
-  production: false,
+  production: true,
   isLocal: false,
-  backendURL: '/api',
+  backendURL: 'http://localhost:8080/api',
   EMAIL_REGEX:
     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
   ADMIN: 'admin',
+  GOOGLE_CLIENT_ID: '',
 };

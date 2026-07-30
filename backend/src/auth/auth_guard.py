@@ -11,20 +11,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Authentication guards and user retrieval using Okta JWT verification."""
+"""Authentication guards and user retrieval."""
 
 
 import asyncio
 import logging
 
-import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from firebase_admin import auth
 
-from src.auth.okta_client_service import okta_client
+# --- Google Auth for Identity Platform ---
+from google.auth.transport import requests as google_auth_requests
+from google.oauth2 import id_token
+
 from src.config.config_service import config_service
 from src.users.user_model import UserModel, UserRoleEnum
 from src.users.user_service import UserService
+
+# Initialize the service once to be used by dependencies.
+# user_service = UserService()  <-- REMOVED
 
 # This scheme will require the client to send a token in the Authorization
 # header. It tells FastAPI how to find the token but doesn't validate it
@@ -42,46 +48,58 @@ async def get_current_user(
     """Dependency that handles the entire authentication and user
     provisioning flow.
 
-    1. Verifies the Okta JWT token (signature, issuer, audience, expiration).
-    2. Checks group membership against the allowed groups.
-    3. Extracts user information (email, name).
-    4. Checks if a user document exists in the database.
-    5. If the user is new, creates their document ("Just-In-Time Provisioning").
-    6. Returns a Pydantic model with the user's data.
+    1. Verifies the Firebase ID token.
+    2. Extracts user information (id, email).
+    3. Checks if a user document exists in Firestore.
+    4. If the user is new, creates their document ("Just-In-Time Provisioning").
+    5. Returns a Pydantic model with the user's data.
     """
-    email = None
     try:
-        # Verify the Okta JWT token using the JWKS client
-        decoded_token = await asyncio.to_thread(
-            okta_client.verify_token, token
-        )
+        decoded_token = {}
+        if config_service.ENVIRONMENT == "local":
+            # --- Local: Use Firebase Auth ---
+            # Verifies the token using the standard Firebase Admin SDK method.
+            logger.info("Verifying token using Firebase Admin SDK...")
+            decoded_token = await asyncio.to_thread(auth.verify_id_token, token)
+        else:
+            # --- Development/Production: Use Google Identity Platform
+            # (OIDC) ---
+            # Verifies the Google-issued OIDC ID token. The audience must be the
+            # OAuth 2.0 client ID of the Identity Platform-protected resource.
+            google_token_audience = config_service.GOOGLE_TOKEN_AUDIENCE
+            decoded_token = await asyncio.to_thread(
+                id_token.verify_oauth2_token,
+                token,
+                google_auth_requests.Request(),
+                audience=google_token_audience,
+            )
 
         email = decoded_token.get("email")
-        name = decoded_token.get("name", "")
+        name = decoded_token.get("name")
         picture = decoded_token.get("picture", "")
-        groups = decoded_token.get("groups", [])
+        token_info_hd = decoded_token.get("hd")
 
-        # Verify the user has a valid email in the token
+        # Restrict by particular organizations if it's a closed environment
         if not email:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=(
                     "Forbidden: User identity could not be confirmed from "
-                    "token. No email claim present."
+                    "token."
                 ),
             )
 
-        # Check group membership if OKTA_ALLOWED_GROUPS is configured
-        if config_service.OKTA_ALLOWED_GROUPS:
-            user_groups = set(groups) if isinstance(groups, list) else set()
-            allowed_groups = config_service.OKTA_ALLOWED_GROUPS
-
-            if not user_groups.intersection(allowed_groups):
+        # If ALLOWED_ORGS is configured, check the user's organization.
+        if config_service.ALLOWED_ORGS:
+            if (
+                not token_info_hd
+                or token_info_hd not in config_service.ALLOWED_ORGS
+            ):
                 raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
+                    status_code=status.HTTP_401_UNAUTHORIZED,
                     detail=(
-                        f"Forbidden: User '{email}' is not a member of any "
-                        "allowed group."
+                        f"User from '{token_info_hd}' is not part of an "
+                        "allowed organization."
                     ),
                 )
 
@@ -109,46 +127,26 @@ async def get_current_user(
 
         return user_doc
 
-    except jwt.ExpiredSignatureError as exc:
+    except auth.ExpiredIdTokenError as exc:
         logger.error(
-            "[get_current_user - ExpiredSignatureError] for %s", email
+            "[get_current_user - auth.ExpiredIdTokenError] for %s", email
         )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication token has expired.",
         ) from exc
-    except jwt.InvalidAudienceError as exc:
+    except auth.InvalidIdTokenError as e:
         logger.error(
-            "[get_current_user - InvalidAudienceError] for %s: %s",
+            "[get_current_user - auth.InvalidIdTokenError] for %s: %s",
             email,
-            exc,
+            e,
         )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token audience.",
-        ) from exc
-    except jwt.InvalidIssuerError as exc:
-        logger.error(
-            "[get_current_user - InvalidIssuerError] for %s: %s",
-            email,
-            exc,
-        )
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token issuer.",
-        ) from exc
-    except jwt.InvalidTokenError as exc:
-        logger.error(
-            "[get_current_user - InvalidTokenError] for %s: %s",
-            email,
-            exc,
-        )
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid authentication token: {exc}",
-        ) from exc
+            detail=f"Invalid authentication token: {e}",
+        ) from e
     except HTTPException as e:
-        logger.error("[get_current_user - HTTPException]: %s", e.detail)
+        logger.error("[get_current_user - Exception]: %s", e)
         raise e
     except Exception as e:
         logger.error("[get_current_user - Exception]: %s", e)
